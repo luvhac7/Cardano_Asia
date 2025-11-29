@@ -1,0 +1,20 @@
+{
+    "projectName": "Nebula AI Copilot",
+    "labelPrefix": "Nebula",
+    "website": "https://nebula-ai.com",
+    "twitter": "nebulacopilot",
+    "discord": "https://discord.gg/nebula",
+    "category": "DEFI",
+    "description": "AI-powered wellness and finance copilot integrating Zero-Knowledge proofs and Cardano DeFi.",
+    "contracts": [
+        {
+            "name": "Nebula Vault",
+            "version": 1,
+            "language": "PLUTUS",
+            "languageVersion": 2,
+            "scriptHash": "<INSERT_SCRIPT_HASH_HERE>",
+            "github": "https://github.com/luv/nebula-ai-copilot",
+            "description": "Main vault contract for user funds and ZK proof verification."
+        }
+    ]
+}

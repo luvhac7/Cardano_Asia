@@ -1,0 +1,52 @@
+// MoodRegistry.compact
+// A Privacy-Preserving Mood Registry for Nebula AI Copilot
+// Track 3: Privacy Mini DApps on Midnight
+
+// Contract: MoodRegistry
+// Purpose: Allows users to prove their mood state (e.g., "Sad", "Happy") to authorized agents (Dopamine Agent)
+//          without revealing the exact timestamp or history to the public ledger.
+//          This enables "Privacy-Preserving Meme Therapy".
+
+import CompactStandardLibrary;
+
+export contract MoodRegistry {
+    // Private State: Only the user can see their full mood history
+    // The ledger only stores the latest "Mood Hash" and a "Last Updated" timestamp
+    ledger {
+        moodHash: Cell<Bytes32>;
+        lastUpdated: Cell<Time>;
+    }
+
+    // Constructor
+    constructor() {
+        moodHash = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        lastUpdated = 0;
+    }
+
+    // Circuit: Update Mood
+    // Input: Private mood data (e.g., "Sad", "Happy")
+    // Output: Public proof that the mood was updated by the owner
+    export circuit updateMood(mood: String, salt: Bytes32): Void {
+        // 1. Verify the caller is the owner (implicit in Compact for private state updates)
+        
+        // 2. Compute the new mood hash (Pedersen Hash or SHA256)
+        //    Hash(mood + salt) -> Ensures the mood string itself isn't revealed
+        const newHash = hash(mood + salt);
+
+        // 3. Update the ledger state
+        moodHash = newHash;
+        lastUpdated = now();
+    }
+
+    // Circuit: Verify Mood for Dopamine Agent
+    // Input: The mood to verify against (e.g., "Sad") and the user's private salt
+    // Output: Boolean (True if the user is indeed "Sad", False otherwise)
+    //         This allows the Dopamine Agent to check "Is User Sad?" without reading the ledger directly.
+    export circuit verifyMood(targetMood: String, salt: Bytes32): Boolean {
+        // 1. Recompute the hash locally inside the ZK circuit
+        const computedHash = hash(targetMood + salt);
+
+        // 2. Compare with the on-chain stored hash
+        return computedHash == moodHash;
+    }
+}

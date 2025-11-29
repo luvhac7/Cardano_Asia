@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+deepface
+opencv-python
+requests
+python-dotenv
+tf-keras
+google-generative-ai
