@@ -119,5 +119,69 @@ export const cardanoStore = {
         const newTransactions = [tx, ...state.transactions];
         cardanoStore.saveState(state.balance + amount, newTransactions, state.address);
         return tx;
+    },
+
+    // Simulated Send Transaction (ZK Proof of Solvency)
+    sendTransaction: (recipient: string, amount: number) => {
+        const state = cardanoStore.getState();
+
+        if (state.balance < amount) {
+            throw new Error("Insufficient funds for transaction");
+        }
+
+        const tx: CardanoTransaction = {
+            id: crypto.randomUUID(),
+            type: 'Transfer',
+            amount: -amount,
+            description: `Sent to ${recipient.substring(0, 8)}...`,
+            timestamp: Date.now(),
+            hash: `sim-tx-${Math.random().toString(36).substring(7)}`
+        };
+
+        const newTransactions = [tx, ...state.transactions];
+        // Deduct from simulated balance
+        cardanoStore.saveState(state.balance - amount, newTransactions, state.address);
+        return tx;
+    },
+
+    // Simulated Swap (DEX Aggregator)
+    swapTransaction: (fromToken: string, toToken: string, amount: number) => {
+        const state = cardanoStore.getState();
+        if (state.balance < amount) throw new Error("Insufficient funds for swap");
+
+        const tx: CardanoTransaction = {
+            id: crypto.randomUUID(),
+            type: 'Transfer', // In reality, this is a complex script interaction
+            amount: -amount,
+            description: `Swap ${amount} ${fromToken} to ${toToken}`,
+            timestamp: Date.now(),
+            hash: `sim-dex-${Math.random().toString(36).substring(7)}`
+        };
+
+        const newTransactions = [tx, ...state.transactions];
+        cardanoStore.saveState(state.balance - amount, newTransactions, state.address);
+        return tx;
+    },
+
+    // Simulated Staking (Delegation)
+    stakeTransaction: (poolId: string) => {
+        const state = cardanoStore.getState();
+        const deposit = 2; // Standard ADA staking deposit
+        const fee = 0.17; // Standard fee
+
+        if (state.balance < (deposit + fee)) throw new Error("Insufficient funds for delegation");
+
+        const tx: CardanoTransaction = {
+            id: crypto.randomUUID(),
+            type: 'Fee',
+            amount: -(deposit + fee),
+            description: `Delegate to ${poolId}`,
+            timestamp: Date.now(),
+            hash: `sim-stake-${Math.random().toString(36).substring(7)}`
+        };
+
+        const newTransactions = [tx, ...state.transactions];
+        cardanoStore.saveState(state.balance - (deposit + fee), newTransactions, state.address);
+        return tx;
     }
 };

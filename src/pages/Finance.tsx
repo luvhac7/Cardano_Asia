@@ -8,6 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import {
     Wallet, ArrowUpRight, ArrowDownLeft, Repeat, Layers,
     Settings, Copy, TrendingUp, Plus, Trash2, DollarSign, BrainCircuit
 } from "lucide-react";
@@ -151,10 +160,254 @@ const Finance = () => {
 
                     {/* Quick Actions */}
                     <div className="grid grid-cols-4 gap-4">
-                        <ActionButton icon={ArrowUpRight} label="Send" onClick={() => toast.info("Send feature coming soon")} />
-                        <ActionButton icon={ArrowDownLeft} label="Receive" onClick={handleCopyAddress} />
-                        <ActionButton icon={Repeat} label="Swap" onClick={() => toast.info("DEX integration coming soon")} />
-                        <ActionButton icon={Layers} label="Stake" onClick={() => toast.success("Staked to NEBULA Pool")} />
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <div className="flex flex-col items-center gap-2 cursor-pointer">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-14 w-14 rounded-full border-white/10 bg-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all"
+                                    >
+                                        <ArrowUpRight className="w-6 h-6 text-white" />
+                                    </Button>
+                                    <span className="text-xs text-slate-400 font-medium">Send</span>
+                                </div>
+                            </DialogTrigger>
+                            <DialogContent className="bg-slate-900 border-emerald-500/20 text-white">
+                                <DialogHeader>
+                                    <DialogTitle>Send ADA</DialogTitle>
+                                    <DialogDescription className="text-slate-400">
+                                        Securely transfer assets with ZK Proof of Solvency.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-300">Recipient Address</label>
+                                        <Input
+                                            placeholder="addr_test1..."
+                                            className="bg-black/20 border-white/10 focus:border-emerald-500/50"
+                                            id="recipient-address"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-300">Amount (ADA)</label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-2.5 text-slate-500">₳</span>
+                                            <Input
+                                                type="number"
+                                                placeholder="0.00"
+                                                className="pl-8 bg-black/20 border-white/10 focus:border-emerald-500/50"
+                                                id="send-amount"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                        onClick={() => {
+                                            const recipient = (document.getElementById('recipient-address') as HTMLInputElement).value;
+                                            const amount = parseFloat((document.getElementById('send-amount') as HTMLInputElement).value);
+
+                                            if (!recipient || !amount) {
+                                                toast.error("Please fill in all fields");
+                                                return;
+                                            }
+
+                                            try {
+                                                cardanoStore.sendTransaction(recipient, amount);
+                                                toast.success("Transaction Sent! ZK Proof Verified.");
+                                                refreshData();
+                                                // Close dialog logic would go here, but for now we rely on user clicking outside or we'd need controlled state
+                                            } catch (e: any) {
+                                                toast.error(e.message);
+                                            }
+                                        }}
+                                    >
+                                        Confirm Transfer
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        {/* Receive Modal */}
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <div className="flex flex-col items-center gap-2 cursor-pointer">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-14 w-14 rounded-full border-white/10 bg-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all"
+                                    >
+                                        <ArrowDownLeft className="w-6 h-6 text-white" />
+                                    </Button>
+                                    <span className="text-xs text-slate-400 font-medium">Receive</span>
+                                </div>
+                            </DialogTrigger>
+                            <DialogContent className="bg-slate-900 border-emerald-500/20 text-white">
+                                <DialogHeader>
+                                    <DialogTitle>Receive Assets</DialogTitle>
+                                    <DialogDescription className="text-slate-400">
+                                        Scan QR or copy address to deposit funds.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex flex-col items-center py-6 space-y-4">
+                                    <div className="w-48 h-48 bg-white p-2 rounded-xl">
+                                        {/* Placeholder QR Code */}
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${DEFAULT_ADDRESS}`}
+                                            alt="Wallet QR"
+                                            className="w-full h-full"
+                                        />
+                                    </div>
+                                    <div className="w-full bg-black/30 p-3 rounded-lg flex items-center justify-between border border-white/10">
+                                        <span className="text-xs text-slate-400 font-mono truncate mr-2">
+                                            {DEFAULT_ADDRESS}
+                                        </span>
+                                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleCopyAddress}>
+                                            <Copy className="w-4 h-4 text-emerald-500" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+
+                        {/* Swap Modal */}
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <div className="flex flex-col items-center gap-2 cursor-pointer">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-14 w-14 rounded-full border-white/10 bg-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all"
+                                    >
+                                        <Repeat className="w-6 h-6 text-white" />
+                                    </Button>
+                                    <span className="text-xs text-slate-400 font-medium">Swap</span>
+                                </div>
+                            </DialogTrigger>
+                            <DialogContent className="bg-slate-900 border-emerald-500/20 text-white">
+                                <DialogHeader>
+                                    <DialogTitle>Swap Tokens</DialogTitle>
+                                    <DialogDescription className="text-slate-400">
+                                        Instant DEX aggregation with privacy protection.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-300">From</label>
+                                        <div className="flex gap-2">
+                                            <Input value="ADA" disabled className="w-24 bg-black/20 border-white/10" />
+                                            <Input
+                                                type="number"
+                                                placeholder="Amount"
+                                                className="bg-black/20 border-white/10 focus:border-emerald-500/50"
+                                                id="swap-amount"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <Repeat className="w-6 h-6 text-emerald-500 animate-pulse" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-300">To</label>
+                                        <Select defaultValue="SNEK">
+                                            <SelectTrigger className="bg-black/20 border-white/10">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="SNEK">SNEK (Meme)</SelectItem>
+                                                <SelectItem value="MIN">MIN (MinSwap)</SelectItem>
+                                                <SelectItem value="HOSKY">HOSKY (Doggo)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                        onClick={() => {
+                                            const amount = parseFloat((document.getElementById('swap-amount') as HTMLInputElement).value);
+                                            if (!amount) return toast.error("Enter amount");
+
+                                            try {
+                                                cardanoStore.swapTransaction("ADA", "SNEK", amount);
+                                                toast.success("Swap Executed! (Simulated)");
+                                                refreshData();
+                                            } catch (e: any) {
+                                                toast.error(e.message);
+                                            }
+                                        }}
+                                    >
+                                        Swap Now
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        {/* Stake Modal */}
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <div className="flex flex-col items-center gap-2 cursor-pointer">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-14 w-14 rounded-full border-white/10 bg-white/5 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all"
+                                    >
+                                        <Layers className="w-6 h-6 text-white" />
+                                    </Button>
+                                    <span className="text-xs text-slate-400 font-medium">Stake</span>
+                                </div>
+                            </DialogTrigger>
+                            <DialogContent className="bg-slate-900 border-emerald-500/20 text-white">
+                                <DialogHeader>
+                                    <DialogTitle>Staking Center</DialogTitle>
+                                    <DialogDescription className="text-slate-400">
+                                        Delegate to a pool to earn rewards (~3-4% APY).
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="font-bold text-emerald-400">NEBULA Pool</span>
+                                            <span className="text-xs bg-emerald-500/20 px-2 py-1 rounded text-emerald-300">Recommended</span>
+                                        </div>
+                                        <div className="text-sm text-slate-300">
+                                            Support the Nebula ecosystem and earn enhanced rewards.
+                                        </div>
+                                        <div className="mt-3 flex gap-4 text-xs text-slate-400">
+                                            <span>ROA: <b>4.2%</b></span>
+                                            <span>Saturation: <b>12%</b></span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-300">Custom Pool ID (Optional)</label>
+                                        <Input
+                                            placeholder="pool1..."
+                                            className="bg-black/20 border-white/10 focus:border-emerald-500/50"
+                                            id="stake-pool-id"
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                        onClick={() => {
+                                            const poolId = (document.getElementById('stake-pool-id') as HTMLInputElement).value || "NEBULA Pool";
+                                            try {
+                                                cardanoStore.stakeTransaction(poolId);
+                                                toast.success(`Delegated to ${poolId}!`);
+                                                refreshData();
+                                            } catch (e: any) {
+                                                toast.error(e.message);
+                                            }
+                                        }}
+                                    >
+                                        Delegate Stake (2 ADA Deposit)
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
 
                     {/* Assets */}

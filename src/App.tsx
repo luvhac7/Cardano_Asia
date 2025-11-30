@@ -13,6 +13,7 @@ import Echo from "./pages/Echo";
 import DataDAO from "./pages/DataDAO";
 import Pulse from "./pages/Pulse";
 import NotFound from "./pages/NotFound";
+import { Footer } from "./components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -37,8 +38,10 @@ const App = () => (
             <Route path="/echo" element={<Echo />} />
             <Route path="/dao" element={<DataDAO />} />
             <Route path="/pulse" element={<Pulse />} />
+            <Route path="/pulse" element={<Pulse />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Footer />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

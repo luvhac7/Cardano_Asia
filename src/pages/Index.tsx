@@ -4,7 +4,6 @@ import { Features } from "@/components/Features";
 import { Problem } from "@/components/Problem";
 import { Team } from "@/components/Team";
 import { TechStack } from "@/components/TechStack";
-import { Footer } from "@/components/Footer";
 
 const Index = () => {
   return (
@@ -15,7 +14,6 @@ const Index = () => {
       <Problem />
       <Team />
       <TechStack />
-      <Footer />
     </div>
   );
 };
